@@ -2,6 +2,26 @@
 
 You are working on an STL (Social Technology Lab) project. Follow these practices.
 
+## stl-cc (This Setup)
+
+This CLAUDE.md was installed by **stl-cc** - the shared Claude Code configuration for STL.
+
+**Location**: `~/code/stl-cc`
+
+**What it provides**:
+- MCP plugins (dev-browser, code-review, superpowers, context7, etc.)
+- Destructive Command Guard (blocks `rm -rf`, etc.)
+- This best practices file
+
+**Commands**:
+```bash
+stl-cc update      # Pull latest and reinstall plugins
+stl-cc list        # Show installed plugins
+stl-cc uninstall   # Remove everything
+```
+
+**Repo**: `github.com/socialtechnologylab/stl-cc`
+
 ## Package Management
 
 **Python: Always use `uv`**
