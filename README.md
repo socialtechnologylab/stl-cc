@@ -1,65 +1,32 @@
 # stl-cc
 
-STL Claude Code setup - plugins, safety, and best practices.
+STL Claude Code setup.
 
 ## Install
 
 ```bash
-git clone git@github.com:socialtechnologylab/stl-cc.git ~/code/stl-cc && \
-echo 'export PATH="$HOME/code/stl-cc:$PATH"' >> ~/.zshrc && \
-source ~/.zshrc && \
-stl-cc install
+curl -fsSL https://raw.githubusercontent.com/socialtechnologylab/stl-cc/main/install.sh | bash
 ```
 
-## Commands
+Restart Claude Code after.
+
+## What it does
+
+1. **Plugins** - dev-browser, code-review, pyright-lsp, typescript-lsp, commit-commands, feature-dev, github, superpowers, context7
+2. **Safety** - Destructive Command Guard (blocks `rm -rf`, etc.)
+3. **Best practices** - `~/.claude/CLAUDE.md` (use uv, pnpm, ruff, ops.py)
+
+## Update
 
 ```bash
-stl-cc install     # Install everything
-stl-cc update      # Update everything
-stl-cc uninstall   # Remove plugins
-stl-cc list        # Show plugins
+stl-cc update
 ```
 
-## What it installs
+## Files
 
-### Plugins
-
-| Plugin | Description |
-|--------|-------------|
-| `dev-browser` | Browser automation (scraping, testing) |
-| `code-review` | Automated code review |
-| `security-guidance` | Security warnings |
-| `pyright-lsp` | Python language server |
-| `typescript-lsp` | TypeScript/JS language server |
-| `commit-commands` | `/commit`, `/push`, `/pr` |
-| `feature-dev` | 7-phase feature development |
-| `github` | GitHub API integration |
-| `superpowers` | TDD, subagent development |
-| `context7` | Up-to-date library docs |
-
-### Safety
-
-**Destructive Command Guard (dcg)** - blocks dangerous commands like `rm -rf`, `git reset --hard`, etc.
-
-### Best Practices
-
-Installs `~/.claude/CLAUDE.md` with STL conventions:
-- Use `uv` for Python (never pip)
-- Use `pnpm` for JS (never npm)
-- Use `ruff` for linting
-- Deployment via `ops.py`
-
----
-
-## For AI Agents
-
-You are working on an STL project. Key rules:
-
-1. **Python**: Use `uv` (never pip)
-2. **JavaScript**: Use `pnpm` (never npm)
-3. **Linting**: `ruff` for Python, `prettier` for JS
-4. **Testing**: `pytest`
-5. **Deployment**: `uv run ops deploy`
-6. **Secrets**: `.env` file, never commit
-
-See `~/.claude/CLAUDE.md` for full details.
+```
+stl-cc/
+├── install.sh       # Clones repo, adds to PATH, runs stl-cc update
+├── stl-cc           # The command (update/uninstall/list)
+└── papa-CLAUDE.md   # Best practices → ~/.claude/CLAUDE.md
+```
