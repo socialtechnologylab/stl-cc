@@ -5,7 +5,9 @@ STL Claude Code setup.
 ## Install
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/socialtechnologylab/stl-cc/main/install.sh | bash
+git clone git@github.com:socialtechnologylab/stl-cc.git ~/code/stl-cc
+cd ~/code/stl-cc
+./install.sh
 ```
 
 Restart Claude Code after.
@@ -26,7 +28,7 @@ stl-cc update
 
 ```
 stl-cc/
-├── install.sh       # Clones repo, adds to PATH, runs stl-cc update
+├── install.sh       # Adds to PATH, runs stl-cc update
 ├── stl-cc           # The command (update/uninstall/list)
 └── papa-CLAUDE.md   # Best practices → ~/.claude/CLAUDE.md
 ```
