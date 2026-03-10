@@ -1,0 +1,22 @@
+# STL Team Plugins
+# One plugin per line. Comments start with #
+
+# Browser & Testing
+dev-browser@dev-browser-marketplace
+
+# Code Quality
+code-review@claude-plugins-official
+security-guidance@claude-plugins-official
+
+# Language Servers
+pyright-lsp@claude-plugins-official
+typescript-lsp@claude-plugins-official
+
+# Productivity & Workflow
+commit-commands@claude-plugins-official
+feature-dev@claude-plugins-official
+github@claude-plugins-official
+
+# Advanced Development
+superpowers@claude-plugins-official
+context7@claude-plugins-official
