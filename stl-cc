@@ -5,7 +5,6 @@
 set -e
 
 # Colors
-RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
@@ -35,29 +34,29 @@ cmd_update() {
     echo -e "${BLUE}Updating STL Claude Code...${NC}"
     echo ""
 
-    # 1. Plugins
+    # 1. Plugins (idempotent - install is a no-op if already installed)
     echo -e "${BLUE}[1/3] Plugins...${NC}"
     "$CLAUDE_BIN" plugin marketplace update 2>&1 || true
     for plugin in "${PLUGINS[@]}"; do
         echo -e "${YELLOW}  $plugin${NC}"
-        "$CLAUDE_BIN" plugin install "$plugin" 2>&1 | grep -v "already installed" || true
+        "$CLAUDE_BIN" plugin install "$plugin" 2>&1 | grep -v "already" || true
     done
 
-    # 2. DCG
+    # 2. DCG (idempotent - skip if already installed)
     echo ""
     echo -e "${BLUE}[2/3] Destructive Command Guard...${NC}"
     if command -v dcg &>/dev/null; then
-        echo -e "${YELLOW}  Already installed${NC}"
+        echo -e "${GREEN}  Already installed${NC}"
     else
         curl -fsSL "https://raw.githubusercontent.com/Dicklesworthstone/destructive_command_guard/main/install.sh" | bash -s -- --easy-mode
     fi
 
-    # 3. CLAUDE.md
+    # 3. CLAUDE.md (idempotent - always copy, it's fast)
     echo ""
     echo -e "${BLUE}[3/3] CLAUDE.md...${NC}"
     mkdir -p ~/.claude
     cp "$SCRIPT_DIR/papa-CLAUDE.md" ~/.claude/CLAUDE.md
-    echo -e "${GREEN}  ~/.claude/CLAUDE.md${NC}"
+    echo -e "${GREEN}  Updated ~/.claude/CLAUDE.md${NC}"
 
     echo ""
     echo -e "${GREEN}Done! Restart Claude Code.${NC}"
@@ -92,5 +91,5 @@ case "${1:-help}" in
     uninstall) cmd_uninstall ;;
     list)      cmd_list ;;
     help|--help|-h|"") cmd_help ;;
-    *) echo -e "${RED}Unknown: $1${NC}"; cmd_help; exit 1 ;;
+    *) echo "Unknown: $1"; cmd_help; exit 1 ;;
 esac
