@@ -7,7 +7,7 @@ Shared Claude Code plugins and best practices for the STL team.
 ### One-liner
 
 ```bash
-git clone git@github.com:stl-nl/claudeconfig.git ~/code/claudeconfig && \
+git clone git@github.com:socialtechnologylab/claudeconfig.git ~/code/claudeconfig && \
 echo 'export PATH="$HOME/code/claudeconfig:$PATH"' >> ~/.zshrc && \
 source ~/.zshrc && \
 stl-plugins install
@@ -17,7 +17,7 @@ stl-plugins install
 
 ```bash
 # 1. Clone
-git clone git@github.com:stl-nl/claudeconfig.git ~/code/claudeconfig
+git clone git@github.com:socialtechnologylab/claudeconfig.git ~/code/claudeconfig
 
 # 2. Add to PATH (add this line to ~/.zshrc)
 export PATH="$HOME/code/claudeconfig:$PATH"
