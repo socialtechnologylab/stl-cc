@@ -35,7 +35,17 @@ cmd_install() {
         "$CLAUDE_BIN" plugin install "$plugin" 2>&1 || echo -e "${RED}  Failed to install $plugin${NC}"
     done < <(get_plugins)
 
-    echo -e "${GREEN}Done!${NC}"
+    # Install Destructive Command Guard
+    echo ""
+    echo -e "${BLUE}Installing Destructive Command Guard...${NC}"
+    if command -v dcg &>/dev/null; then
+        echo -e "${YELLOW}dcg already installed, skipping${NC}"
+    else
+        curl -fsSL "https://raw.githubusercontent.com/Dicklesworthstone/destructive_command_guard/main/install.sh" | bash -s -- --easy-mode
+    fi
+
+    echo ""
+    echo -e "${GREEN}Done! Restart Claude Code to apply changes.${NC}"
 }
 
 cmd_update() {

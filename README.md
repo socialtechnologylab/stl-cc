@@ -56,6 +56,13 @@ stl-plugins add <name> # Add a new plugin
 | `superpowers` | TDD workflow, subagent development, debugging |
 | `context7` | Fetch up-to-date library documentation |
 
+## Safety
+
+**Destructive Command Guard (dcg)** is automatically installed. It blocks dangerous commands like `rm -rf`, `git reset --hard`, database drops, etc. before they execute.
+
+- Repo: https://github.com/Dicklesworthstone/destructive_command_guard
+- Runs as a Claude Code hook on all Bash commands
+
 ## New Project Setup
 
 Copy the CLAUDE.md template:
