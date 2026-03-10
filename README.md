@@ -74,15 +74,24 @@ This file is read by Claude on every session and prepended to project context.
 - Repo: https://github.com/Dicklesworthstone/destructive_command_guard
 - Runs as a Claude Code hook on all Bash commands
 
-## New Project Setup
+## Project-Specific Context
 
-Copy the CLAUDE.md template:
+For project-specific instructions, create a `CLAUDE.md` in your project root:
 
-```bash
-cp ~/code/claudeconfig/CLAUDE.md.template ./CLAUDE.md
+```markdown
+# My Project
+
+## Overview
+What this project does...
+
+## Architecture
+Key components...
+
+## Known Issues
+Gotchas to watch out for...
 ```
 
-Edit the `Project-Specific` section with your project details.
+Claude reads both `~/.claude/CLAUDE.md` (global practices) and your project's `CLAUDE.md`.
 
 ## Adding New Plugins
 
@@ -171,4 +180,4 @@ uv run ops configure      # Ansible configure
 |------|---------|
 | `stl-plugins` | CLI tool for plugin management |
 | `plugins.txt` | List of team plugins |
-| `CLAUDE.md.template` | Template for new projects |
+| `CLAUDE.md` | Shared best practices (installed to ~/.claude/) |
