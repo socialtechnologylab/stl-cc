@@ -64,7 +64,7 @@ cmd_install() {
     echo ""
     echo -e "${BLUE}[3/3] Installing shared CLAUDE.md...${NC}"
     mkdir -p ~/.claude
-    cp "$SCRIPT_DIR/CLAUDE.md" ~/.claude/CLAUDE.md
+    cp "$SCRIPT_DIR/papa-CLAUDE.md" ~/.claude/CLAUDE.md
     echo -e "${GREEN}  Installed:${NC} ~/.claude/CLAUDE.md"
 
     echo ""
@@ -91,7 +91,7 @@ cmd_update() {
 
     # Update CLAUDE.md
     echo -e "${YELLOW}Updating CLAUDE.md...${NC}"
-    cp "$SCRIPT_DIR/CLAUDE.md" ~/.claude/CLAUDE.md
+    cp "$SCRIPT_DIR/papa-CLAUDE.md" ~/.claude/CLAUDE.md
 
     echo ""
     echo -e "${GREEN}Done! Restart Claude Code to apply changes.${NC}"
