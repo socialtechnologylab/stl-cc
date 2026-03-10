@@ -44,21 +44,37 @@ cmd_install() {
         curl -fsSL "https://raw.githubusercontent.com/Dicklesworthstone/destructive_command_guard/main/install.sh" | bash -s -- --easy-mode
     fi
 
+    # Install shared CLAUDE.md
+    echo ""
+    echo -e "${BLUE}Installing shared CLAUDE.md...${NC}"
+    mkdir -p ~/.claude
+    cp "$SCRIPT_DIR/CLAUDE.md" ~/.claude/CLAUDE.md
+    echo -e "${GREEN}Installed:${NC} ~/.claude/CLAUDE.md"
+
     echo ""
     echo -e "${GREEN}Done! Restart Claude Code to apply changes.${NC}"
 }
 
 cmd_update() {
-    echo -e "${BLUE}Updating STL plugins...${NC}"
+    echo -e "${BLUE}Updating STL config...${NC}"
 
-    # First update marketplaces
+    # Update this repo first
+    echo -e "${YELLOW}Pulling latest claudeconfig...${NC}"
+    git -C "$SCRIPT_DIR" pull --ff-only 2>&1 || echo -e "${RED}  Failed to pull (maybe local changes?)${NC}"
+
+    # Update marketplaces
     echo -e "${YELLOW}Updating marketplaces...${NC}"
     "$CLAUDE_BIN" plugin marketplace update 2>&1 || true
 
+    # Update plugins
     while IFS= read -r plugin || [[ -n "$plugin" ]]; do
         echo -e "${YELLOW}Updating:${NC} $plugin"
         "$CLAUDE_BIN" plugin update "$plugin" 2>&1 || echo -e "${RED}  Failed to update $plugin${NC}"
     done < <(get_plugins)
+
+    # Update shared CLAUDE.md
+    echo -e "${YELLOW}Updating shared CLAUDE.md...${NC}"
+    cp "$SCRIPT_DIR/CLAUDE.md" ~/.claude/CLAUDE.md
 
     echo -e "${GREEN}Done! Restart Claude Code to apply updates.${NC}"
 }

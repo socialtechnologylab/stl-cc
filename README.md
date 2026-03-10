@@ -56,6 +56,17 @@ stl-plugins add <name> # Add a new plugin
 | `superpowers` | TDD workflow, subagent development, debugging |
 | `context7` | Fetch up-to-date library documentation |
 
+## Shared Best Practices
+
+A global `~/.claude/CLAUDE.md` is installed with STL best practices:
+- Use `uv` for Python (never pip)
+- Use `pnpm` for JS (never npm)
+- Use `ruff` for linting
+- Deployment via `ops.py` / stl-infra
+- Infrastructure conventions
+
+This file is read by Claude on every session and prepended to project context.
+
 ## Safety
 
 **Destructive Command Guard (dcg)** is automatically installed. It blocks dangerous commands like `rm -rf`, `git reset --hard`, database drops, etc. before they execute.
