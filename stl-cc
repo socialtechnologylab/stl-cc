@@ -1,0 +1,145 @@
+#!/bin/bash
+# STL Claude Code Setup
+# Installs plugins, dcg, and shared CLAUDE.md
+
+set -e
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+# Script directory
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0" 2>/dev/null || echo "$0")")" && pwd)"
+
+# Claude CLI
+CLAUDE_BIN=$(command -v claude 2>/dev/null || echo "/opt/homebrew/bin/claude")
+
+# Plugins to install
+PLUGINS=(
+    # Browser & Testing
+    "dev-browser@dev-browser-marketplace"
+
+    # Code Quality
+    "code-review@claude-plugins-official"
+    "security-guidance@claude-plugins-official"
+
+    # Language Servers
+    "pyright-lsp@claude-plugins-official"
+    "typescript-lsp@claude-plugins-official"
+
+    # Productivity & Workflow
+    "commit-commands@claude-plugins-official"
+    "feature-dev@claude-plugins-official"
+    "github@claude-plugins-official"
+
+    # Advanced Development
+    "superpowers@claude-plugins-official"
+    "context7@claude-plugins-official"
+)
+
+cmd_install() {
+    echo -e "${BLUE}Setting up STL Claude Code...${NC}"
+    echo ""
+
+    # 1. Install plugins
+    echo -e "${BLUE}[1/3] Installing plugins...${NC}"
+    for plugin in "${PLUGINS[@]}"; do
+        echo -e "${YELLOW}  Installing:${NC} $plugin"
+        "$CLAUDE_BIN" plugin install "$plugin" 2>&1 || echo -e "${RED}    Failed${NC}"
+    done
+
+    # 2. Install dcg
+    echo ""
+    echo -e "${BLUE}[2/3] Installing Destructive Command Guard...${NC}"
+    if command -v dcg &>/dev/null; then
+        echo -e "${YELLOW}  Already installed${NC}"
+    else
+        curl -fsSL "https://raw.githubusercontent.com/Dicklesworthstone/destructive_command_guard/main/install.sh" | bash -s -- --easy-mode
+    fi
+
+    # 3. Install shared CLAUDE.md
+    echo ""
+    echo -e "${BLUE}[3/3] Installing shared CLAUDE.md...${NC}"
+    mkdir -p ~/.claude
+    cp "$SCRIPT_DIR/CLAUDE.md" ~/.claude/CLAUDE.md
+    echo -e "${GREEN}  Installed:${NC} ~/.claude/CLAUDE.md"
+
+    echo ""
+    echo -e "${GREEN}Done! Restart Claude Code to apply changes.${NC}"
+}
+
+cmd_update() {
+    echo -e "${BLUE}Updating STL Claude Code...${NC}"
+    echo ""
+
+    # Pull latest
+    echo -e "${YELLOW}Pulling latest...${NC}"
+    git -C "$SCRIPT_DIR" pull --ff-only 2>&1 || echo -e "${RED}  Failed to pull${NC}"
+
+    # Update marketplaces
+    echo -e "${YELLOW}Updating marketplaces...${NC}"
+    "$CLAUDE_BIN" plugin marketplace update 2>&1 || true
+
+    # Update plugins
+    for plugin in "${PLUGINS[@]}"; do
+        echo -e "${YELLOW}Updating:${NC} $plugin"
+        "$CLAUDE_BIN" plugin update "$plugin" 2>&1 || true
+    done
+
+    # Update CLAUDE.md
+    echo -e "${YELLOW}Updating CLAUDE.md...${NC}"
+    cp "$SCRIPT_DIR/CLAUDE.md" ~/.claude/CLAUDE.md
+
+    echo ""
+    echo -e "${GREEN}Done! Restart Claude Code to apply changes.${NC}"
+}
+
+cmd_uninstall() {
+    echo -e "${BLUE}Removing STL plugins...${NC}"
+
+    for plugin in "${PLUGINS[@]}"; do
+        echo -e "${YELLOW}Removing:${NC} $plugin"
+        "$CLAUDE_BIN" plugin uninstall "$plugin" 2>&1 || true
+    done
+
+    echo ""
+    echo -e "${YELLOW}Note: dcg and ~/.claude/CLAUDE.md not removed (manual cleanup if needed)${NC}"
+    echo -e "${GREEN}Done!${NC}"
+}
+
+cmd_list() {
+    echo -e "${BLUE}STL Plugins:${NC}"
+    for plugin in "${PLUGINS[@]}"; do
+        echo "  - $plugin"
+    done
+}
+
+cmd_help() {
+    echo "STL Claude Code Setup"
+    echo ""
+    echo "Usage: stl-cc <command>"
+    echo ""
+    echo "Commands:"
+    echo "  install     Install plugins, dcg, and CLAUDE.md"
+    echo "  update      Update everything"
+    echo "  uninstall   Remove plugins"
+    echo "  list        Show plugins"
+    echo "  help        Show this help"
+}
+
+# Main
+case "${1:-help}" in
+    install)   cmd_install ;;
+    update)    cmd_update ;;
+    uninstall) cmd_uninstall ;;
+    list)      cmd_list ;;
+    help|--help|-h) cmd_help ;;
+    *)
+        echo -e "${RED}Unknown command: $1${NC}"
+        cmd_help
+        exit 1
+        ;;
+esac

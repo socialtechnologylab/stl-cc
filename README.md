@@ -1,183 +1,65 @@
-# STL Claude Code Config
+# stl-cc
 
-Shared Claude Code plugins and best practices for the STL team.
+STL Claude Code setup - plugins, safety, and best practices.
 
-## Installation
-
-### One-liner
+## Install
 
 ```bash
-git clone git@github.com:socialtechnologylab/claudeconfig.git ~/code/claudeconfig && \
-echo 'export PATH="$HOME/code/claudeconfig:$PATH"' >> ~/.zshrc && \
+git clone git@github.com:socialtechnologylab/stl-cc.git ~/code/stl-cc && \
+echo 'export PATH="$HOME/code/stl-cc:$PATH"' >> ~/.zshrc && \
 source ~/.zshrc && \
-stl-plugins install
-```
-
-### Step by step
-
-```bash
-# 1. Clone
-git clone git@github.com:socialtechnologylab/claudeconfig.git ~/code/claudeconfig
-
-# 2. Add to PATH (add this line to ~/.zshrc)
-export PATH="$HOME/code/claudeconfig:$PATH"
-
-# 3. Reload shell
-source ~/.zshrc
-
-# 4. Install all plugins
-stl-plugins install
-
-# 5. Restart Claude Code
+stl-cc install
 ```
 
 ## Commands
 
 ```bash
-stl-plugins install    # Install all plugins
-stl-plugins update     # Update all plugins + marketplaces
-stl-plugins delete     # Remove all plugins
-stl-plugins list       # Show plugin list
-stl-plugins add <name> # Add a new plugin
+stl-cc install     # Install everything
+stl-cc update      # Update everything
+stl-cc uninstall   # Remove plugins
+stl-cc list        # Show plugins
 ```
 
-## Included Plugins
+## What it installs
 
-| Plugin | What it does |
-|--------|--------------|
-| `dev-browser` | Browser automation - scraping, testing, screenshots |
-| `code-review` | Automated code review with confidence scoring |
-| `security-guidance` | Warns about security issues when editing files |
-| `pyright-lsp` | Python language server (type checking, intellisense) |
+### Plugins
+
+| Plugin | Description |
+|--------|-------------|
+| `dev-browser` | Browser automation (scraping, testing) |
+| `code-review` | Automated code review |
+| `security-guidance` | Security warnings |
+| `pyright-lsp` | Python language server |
 | `typescript-lsp` | TypeScript/JS language server |
-| `commit-commands` | `/commit`, `/push`, `/pr` slash commands |
-| `feature-dev` | 7-phase structured feature development |
-| `github` | GitHub API - issues, PRs, repos |
-| `superpowers` | TDD workflow, subagent development, debugging |
-| `context7` | Fetch up-to-date library documentation |
+| `commit-commands` | `/commit`, `/push`, `/pr` |
+| `feature-dev` | 7-phase feature development |
+| `github` | GitHub API integration |
+| `superpowers` | TDD, subagent development |
+| `context7` | Up-to-date library docs |
 
-## Shared Best Practices
+### Safety
 
-A global `~/.claude/CLAUDE.md` is installed with STL best practices:
+**Destructive Command Guard (dcg)** - blocks dangerous commands like `rm -rf`, `git reset --hard`, etc.
+
+### Best Practices
+
+Installs `~/.claude/CLAUDE.md` with STL conventions:
 - Use `uv` for Python (never pip)
 - Use `pnpm` for JS (never npm)
 - Use `ruff` for linting
-- Deployment via `ops.py` / stl-infra
-- Infrastructure conventions
-
-This file is read by Claude on every session and prepended to project context.
-
-## Safety
-
-**Destructive Command Guard (dcg)** is automatically installed. It blocks dangerous commands like `rm -rf`, `git reset --hard`, database drops, etc. before they execute.
-
-- Repo: https://github.com/Dicklesworthstone/destructive_command_guard
-- Runs as a Claude Code hook on all Bash commands
-
-## Project-Specific Context
-
-For project-specific instructions, create a `CLAUDE.md` in your project root:
-
-```markdown
-# My Project
-
-## Overview
-What this project does...
-
-## Architecture
-Key components...
-
-## Known Issues
-Gotchas to watch out for...
-```
-
-Claude reads both `~/.claude/CLAUDE.md` (global practices) and your project's `CLAUDE.md`.
-
-## Adding New Plugins
-
-```bash
-# Add and install
-stl-plugins add playwright@claude-plugins-official
-
-# Or edit plugins.txt directly, then:
-stl-plugins install
-```
-
-Browse available plugins: https://github.com/anthropics/claude-plugins-official
+- Deployment via `ops.py`
 
 ---
 
 ## For AI Agents
 
-This section is for Claude and other AI agents working with STL codebases.
+You are working on an STL project. Key rules:
 
-### Stack
+1. **Python**: Use `uv` (never pip)
+2. **JavaScript**: Use `pnpm` (never npm)
+3. **Linting**: `ruff` for Python, `prettier` for JS
+4. **Testing**: `pytest`
+5. **Deployment**: `uv run ops deploy`
+6. **Secrets**: `.env` file, never commit
 
-- **Python**: Use `uv` (never pip). Config in `pyproject.toml`.
-- **JavaScript**: Use `pnpm` (never npm).
-- **Linting**: `ruff` for Python, `prettier` for JS.
-- **Testing**: `pytest`.
-
-### Deployment
-
-All STL projects use `stl-infra` with `ops.py`:
-
-```bash
-uv run ops provision        # Create infrastructure
-uv run ops deploy [target]  # Deploy application
-uv run ops deploy --all     # Deploy everything
-uv run ops status           # Health check
-```
-
-### Infrastructure Conventions
-
-- **Cloud**: Hetzner Cloud (servers), Cloudflare (DNS)
-- **IaC**: Terraform + Ansible
-- **Monitoring**: BetterStack
-- **Secrets**: `.env` file (never commit)
-
-### Path Conventions
-
-```
-/run/<app>/<app>.sock    # Unix socket
-/opt/<app>/              # App directory
-/var/log/<app>/          # Logs
-/var/www/<app>/          # Web root
-```
-
-### Key Commands
-
-```bash
-# Python
-uv run <script>           # Run with uv
-uv sync                   # Install dependencies
-ruff check .              # Lint
-ruff format .             # Format
-
-# JavaScript
-pnpm install              # Install
-pnpm dev                  # Dev server
-pnpm build                # Build
-
-# Infrastructure
-uv run ops infra plan     # Terraform plan
-uv run ops infra apply    # Terraform apply
-uv run ops configure      # Ansible configure
-```
-
-### Important
-
-1. Always read `CLAUDE.md` in project root first
-2. Use `uv` for Python, `pnpm` for JS - never pip/npm
-3. Secrets go in `.env`, never committed
-4. All infra changes go through `ops.py`
-
----
-
-## Files
-
-| File | Purpose |
-|------|---------|
-| `stl-plugins` | CLI tool for plugin management |
-| `plugins.txt` | List of team plugins |
-| `CLAUDE.md` | Shared best practices (installed to ~/.claude/) |
+See `~/.claude/CLAUDE.md` for full details.
