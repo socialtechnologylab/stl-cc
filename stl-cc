@@ -1,6 +1,6 @@
 #!/bin/bash
 # STL Claude Code
-# Manages plugins, dcg, and shared CLAUDE.md
+# Manages plugins, dcg, skills, mcps, and shared CLAUDE.md
 
 set -e
 
@@ -35,7 +35,7 @@ cmd_update() {
     echo ""
 
     # 1. Plugins (idempotent - install is a no-op if already installed)
-    echo -e "${BLUE}[1/3] Plugins...${NC}"
+    echo -e "${BLUE}[1/5] Plugins...${NC}"
     "$CLAUDE_BIN" plugin marketplace update 2>&1 || true
     for plugin in "${PLUGINS[@]}"; do
         echo -e "${YELLOW}  $plugin${NC}"
@@ -44,19 +44,66 @@ cmd_update() {
 
     # 2. DCG (idempotent - skip if already installed)
     echo ""
-    echo -e "${BLUE}[2/3] Destructive Command Guard...${NC}"
+    echo -e "${BLUE}[2/5] Destructive Command Guard...${NC}"
     if command -v dcg &>/dev/null; then
         echo -e "${GREEN}  Already installed${NC}"
     else
         curl -fsSL "https://raw.githubusercontent.com/Dicklesworthstone/destructive_command_guard/main/install.sh" | bash -s -- --easy-mode
     fi
 
-    # 3. CLAUDE.md (idempotent - always copy, it's fast)
+    # 3. CLAUDE.md
     echo ""
-    echo -e "${BLUE}[3/3] CLAUDE.md...${NC}"
+    echo -e "${BLUE}[3/5] CLAUDE.md...${NC}"
     mkdir -p ~/.claude
-    cp "$SCRIPT_DIR/papa-CLAUDE.md" ~/.claude/CLAUDE.md
-    echo -e "${GREEN}  Updated ~/.claude/CLAUDE.md${NC}"
+    if [[ ! -f ~/.claude/CLAUDE.md ]]; then
+        cp "$SCRIPT_DIR/papa-CLAUDE.md" ~/.claude/CLAUDE.md
+        echo -e "${GREEN}  Installed ~/.claude/CLAUDE.md${NC}"
+    elif diff -q "$SCRIPT_DIR/papa-CLAUDE.md" ~/.claude/CLAUDE.md &>/dev/null; then
+        echo -e "${GREEN}  Already up to date${NC}"
+    else
+        echo -e "${YELLOW}  ~/.claude/CLAUDE.md differs from papa-CLAUDE.md${NC}"
+        echo -e "${YELLOW}  Run 'stl-cc sync-claude-md' to see diff, or manually merge${NC}"
+    fi
+
+    # 4. Skills (symlink stl-infra from sibling repo, clone if missing)
+    echo ""
+    echo -e "${BLUE}[4/5] Skills...${NC}"
+    STL_INFRA_DIR="$SCRIPT_DIR/../stl-infra"
+    if [[ ! -d "$STL_INFRA_DIR" ]]; then
+        echo -e "${YELLOW}  stl-infra repo not found, cloning...${NC}"
+        git clone git@github.com:socialtechnologylab/stl-infra.git "$STL_INFRA_DIR" 2>&1
+    fi
+    STL_INFRA_SKILL="$STL_INFRA_DIR/SKILL.md"
+    if [[ -f "$STL_INFRA_SKILL" ]]; then
+        mkdir -p ~/.claude/skills/stl-infra
+        SKILL_TARGET=$(cd "$(dirname "$STL_INFRA_SKILL")" && pwd)/SKILL.md
+        if [[ -L ~/.claude/skills/stl-infra/SKILL.md ]]; then
+            CURRENT_LINK=$(readlink -f ~/.claude/skills/stl-infra/SKILL.md)
+            if [[ "$CURRENT_LINK" == "$SKILL_TARGET" ]]; then
+                echo -e "${GREEN}  stl-infra skill: already linked${NC}"
+            else
+                ln -sf "$SKILL_TARGET" ~/.claude/skills/stl-infra/SKILL.md
+                echo -e "${GREEN}  stl-infra skill: updated symlink${NC}"
+            fi
+        else
+            rm -f ~/.claude/skills/stl-infra/SKILL.md
+            ln -s "$SKILL_TARGET" ~/.claude/skills/stl-infra/SKILL.md
+            echo -e "${GREEN}  stl-infra skill: linked → $SKILL_TARGET${NC}"
+        fi
+    else
+        echo -e "${YELLOW}  stl-infra SKILL.md not found (unexpected)${NC}"
+    fi
+
+    # 5. MCP servers
+    echo ""
+    echo -e "${BLUE}[5/5] MCP servers...${NC}"
+    if "$CLAUDE_BIN" mcp list 2>/dev/null | grep -q "exa"; then
+        echo -e "${GREEN}  exa: already configured${NC}"
+    else
+        "$CLAUDE_BIN" mcp add --transport http --scope user exa "https://mcp.exa.ai/mcp" 2>&1
+        echo -e "${GREEN}  exa: added (remote, free tier)${NC}"
+        echo -e "${YELLOW}  For API key: claude mcp remove exa && claude mcp add --transport http exa 'https://mcp.exa.ai/mcp?exaApiKey=YOUR_KEY'${NC}"
+    fi
 
     echo ""
     echo -e "${GREEN}Done! Restart Claude Code.${NC}"
@@ -77,19 +124,40 @@ cmd_list() {
     done
 }
 
+cmd_sync_claude_md() {
+    if [[ ! -f ~/.claude/CLAUDE.md ]]; then
+        cp "$SCRIPT_DIR/papa-CLAUDE.md" ~/.claude/CLAUDE.md
+        echo -e "${GREEN}Installed ~/.claude/CLAUDE.md${NC}"
+    elif diff -q "$SCRIPT_DIR/papa-CLAUDE.md" ~/.claude/CLAUDE.md &>/dev/null; then
+        echo -e "${GREEN}Already in sync.${NC}"
+    else
+        echo -e "${YELLOW}Diff (papa-CLAUDE.md vs ~/.claude/CLAUDE.md):${NC}"
+        echo ""
+        diff --color "$SCRIPT_DIR/papa-CLAUDE.md" ~/.claude/CLAUDE.md || true
+        echo ""
+        echo -e "${YELLOW}To overwrite with repo version: stl-cc sync-claude-md --force${NC}"
+        if [[ "${1:-}" == "--force" ]]; then
+            cp "$SCRIPT_DIR/papa-CLAUDE.md" ~/.claude/CLAUDE.md
+            echo -e "${GREEN}Overwritten ~/.claude/CLAUDE.md${NC}"
+        fi
+    fi
+}
+
 cmd_help() {
     echo "stl-cc - STL Claude Code"
     echo ""
     echo "Commands:"
-    echo "  update      Install/update plugins, dcg, CLAUDE.md"
-    echo "  uninstall   Remove plugins"
-    echo "  list        Show plugins"
+    echo "  update           Install/update plugins, dcg, CLAUDE.md"
+    echo "  sync-claude-md   Show diff between repo and local CLAUDE.md"
+    echo "  uninstall        Remove plugins"
+    echo "  list             Show plugins"
 }
 
 case "${1:-help}" in
-    update)    cmd_update ;;
-    uninstall) cmd_uninstall ;;
-    list)      cmd_list ;;
+    update)          cmd_update ;;
+    sync-claude-md)  cmd_sync_claude_md "$2" ;;
+    uninstall)       cmd_uninstall ;;
+    list)            cmd_list ;;
     help|--help|-h|"") cmd_help ;;
     *) echo "Unknown: $1"; cmd_help; exit 1 ;;
 esac
